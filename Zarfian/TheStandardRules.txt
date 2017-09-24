@@ -1,0 +1,218 @@
+﻿
+Volume - the Standard Rules
+
+Book 1 - Basic computer stuff
+
+Chapter 1 - Input
+
+Section 1 - primitives which are hard-coded into the compiler/interpreter - private
+
+do ReadKeyboard
+do ReadKey
+do Parse
+
+Section 2 - input vars
+
+do ThePlayersCommand as ""
+do verb as "" 
+do prep as "" 
+do noun as "" 
+do noun2 as ""
+
+Section 3 - Input interface
+
+do TheCommandPrompt as "> "
+do ReadACommand as { "\n\n"; TheCommandPrompt; WaitForPlayerInput; }
+do WaitForPlayerInput as {ThePlayersCommand := ReadKeyboard;}
+
+
+Chapter 2 - Output
+
+do newline as "\n"
+
+private Count as 5
+
+
+Book 2 - Basic game stuff
+
+Chapter 1 - Game skeleton
+
+do ProgramStart as 
+{
+	WhenPlayBegins; newline;
+	newline;
+	newline;
+	StoryTitle; newline; 
+	"An interactive fiction by "; StoryAuthor; newline; newline; 
+	Look;
+}
+
+do WhenPlayBegins as { }
+
+do MainLoop as { TurnCount := TurnCount + 1; ReadACommand; action := ""; Parse; }
+
+do TurnCount as 0
+
+do Win as { newline; newline; " *** You have WON! ***"; newline; newline; "Your final score is "; score; " points!\n"; ThePlayersCommand := "quit"; }
+
+do Lose as { newline; newline; " *** You have lost ***"; newline; newline; "Your score was only "; score; " points.\n"; ThePlayersCommand := "quit"; }
+
+do action as ""
+do phase as ""
+
+do DecideAction as 
+{
+	(verb = "insert" || verb = "put") && noun2 != "" ? { action := "InsertInto";};
+	(verb = "x" || verb = "examine") ? { action := "Examine";};
+	(verb = "l" || verb = "look") ? { action := "Look";};
+	(verb = "i") || (verb = "take" && noun = "inventory") ? { action := "TakeInventory";};
+	verb = "w" || (verb = "go" && noun = "west") ? { action := "Go"; noun := "West"; };
+	verb = "n" || (verb = "go" && noun = "north") ? { action := "Go"; noun := "North"; };
+	verb = "s" || (verb = "go" && noun = "south") ? { action := "Go"; noun := "South"; };
+	verb = "e" || (verb = "go" && noun = "east") ? { action := "Go"; noun := "East"; };
+	verb = "drop" && noun <> "" ? { action := "Drop"; };
+	verb = "put" && noun = "on" ? { verb := "Wear"; noun := prep; prep := ""; };
+	verb = "wear" && noun <> "" ? { verb := "Wear"; };
+	verb = "put" && prep = "on" ? { verb := "PutOn";};
+
+	Action("Check", action, noun, noun2);
+	Action("CarryOut", action, noun, noun2);
+	Action("Report", action, noun, noun2);
+
+} if verb != "" 
+
+
+do BlankLine as 
+{
+	"I beg your pardon?";
+} if verb = ""
+
+
+Chapter 3 - Actions
+
+do Action("Check", "InsertsInto", noun, noun2) as 
+{
+	noun2; " cannot contain things.\n";
+} if CanContain(noun2) = false 
+
+do Action("Check", "InsertsInto",noun,noun2) as 
+{
+	noun2; " cannot contain things.\n";
+} if CanContain(noun2) = false 
+
+do Action("CarryOut", "InsertsInto", noun,noun2) as 
+{
+	CanContain(noun2) ? {
+		IsIn(noun,noun2) := true; 
+	}
+} 
+
+do Action("Report", "InsertsInto",noun,noun2) as
+{
+	"You put the "; noun; " into the "; noun2; "."; 
+}  
+
+
+do Action("Check", "Examine", "") as 
+{
+	"You didn't mention what you wished to examine."; 
+}
+
+do Action("CarryOut", "Examine",noun) as 
+{
+	Description(noun);
+} if Description(noun) 
+
+do Action("CarryOut", "Examine",noun) as 
+{
+	"You see nothing unusual about the "; noun; "."; 
+} if Description(noun) = false
+
+
+do Action("CarryOut", "TakeInventory") as
+{
+	"You are wearing: "; newline;
+	IsWearing(me,_) ? { "    a "; understand(_,eachIsWearing); newline; };
+	newline;
+	"You are carrying: "; newline;
+	IsCarrying(me,_) ? { "    a "; understand(_,eachIsCarrying); newline; };
+} 
+
+
+do Action("Check", "Go","West") as
+{
+	WestEast(_,location) == false ? { "You can't go west from here."; }
+} 
+
+do Action("Check", "Go","North") as
+{
+	NorthSouth(_,location) == false ? { "You can't go north from here."; }
+} 
+
+do Action("Check", "Go","East") as
+{
+	WestEast(location,_) == false ? { "You can't go east from here."; }
+} 
+
+do Action("Check", "Go","South") as
+{
+	NorthSouth(location,_) == false ? { "You can't go south from here."; }
+} 
+
+do Action("CarryOut", "Go","West") as
+{
+	location := WestEast(_,location);
+} if WestEast(_,location) 
+
+do Action("CarryOut", "Go","North") as
+{
+	location := NorthSouth(_,location) ;
+} if NorthSouth(_,location)
+
+do Action("CarryOut", "Go","East") as
+{
+	location := WestEast(location,_) ;
+} if WestEast(location,_)
+
+do Action("CarryOut", "Go","South") as
+{
+	location := NorthSouth(location,_) ;
+} if NorthSouth(location,_) 
+
+do Action("Report", "Go") as 
+{
+	Look;
+} 
+
+
+do Look as 
+{
+	Action("Check","Look");
+	Action("CarryOut","Look");
+} 
+
+do Action("Check", "Look") as 
+{
+	DarknessMessage;
+} if IsDark(location)
+
+do Action("CarryOut", "Look") as
+{
+	newline;
+	Heading(location); newline;
+	Description(location);
+} if IsDark(location) = false
+
+do DarknessMessage as "It is pitch dark, and you can't see a thing." 
+
+
+
+rules named MainLoop precede rules checking verb
+rules checking verb precede rules named Action("Check"*
+rules named Action("Check"* precede rules named Action("CarryOut"*
+rules named Action("CarryOut"* precede rules named Action("Report"*
+
+
+
+
+

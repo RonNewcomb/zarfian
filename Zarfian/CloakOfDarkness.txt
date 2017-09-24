@@ -1,0 +1,132 @@
+﻿
+
+Volume 1 - cloak of darkness
+
+Chapter 1: props
+
+do Pi as 3.14159
+
+do StoryTitle as "Cloak of Darkness"
+
+do StoryAuthor as "Ron Newcomb" 
+
+do MaximumScore as 2
+do score as 0
+
+do Foyer
+do Room(Foyer)
+do Heading(Foyer) as "The Foyer of the Opera House"
+do Description(Foyer) as "You are standing in a spacious hall, splendidly decorated in red and gold, with glittering chandeliers overhead.  The entrance from the street is to the north, and there are doorways south and west."
+do understand("foyer",Foyer)
+
+do location as Foyer
+
+do Cloakroom
+do Room(Cloakroom)
+do Heading(Cloakroom) as "The Cloakroom"
+do Description(Cloakroom) as "The walls of this small room were clearly once lined with hooks, though now only one remains. The exit is a door to the east."
+do understand("cloakroom",Cloakroom)
+
+do Hook
+do Thing(Hook)
+do CanSupport(Hook)
+do Description(Hook) as "It's just a small brass hook, [if something is on the hook]with [a list of things on the hook] hanging on it[otherwise]screwed to the wall[end if]."
+do understand("hook",Hook)
+do IsIn(Hook,Cloakroom)
+
+do Bar
+do Room(Bar)
+do Heading(Bar) as "The Barroom"
+do Description(Bar) as "The bar, much rougher than you'd have guessed after the opulence of the foyer to the north, is completely empty. There seems to be some sort of message scrawled in the sawdust on the floor."
+do understand("bar",Bar)
+do IsDark(Bar)
+
+do WestEast(Cloakroom, Foyer)
+do NorthSouth(Foyer,Bar)
+
+
+do Description(cloak) as "A handsome cloak, of velvet trimmed with satin, and slightly splattered with raindrops. Its blackness is so deep that it almost seems to suck light from the room."
+do understand("cloak",cloak)
+do CanWear(cloak)
+
+do understand("me",me)
+do Description(me) as "You are a heroic adventurer, dripping wet."
+do IsWearing(me,cloak)
+
+
+
+Chapter 2: actions
+
+do TheScrawledMessage as { score := score + 1; "The message, neatly marked in the sawdust, reads...\n"; Win;}
+
+do OtherThanGo(direction) as
+{
+    TheScrawledMessage := { score := score + 1; "The message, difficult to make out but still legible, reads...\n"; Win;};
+    "In the dark? You could easily disturb something."
+} if IsDark(location) 
+
+do Action("Check","Go",direction) as
+{
+    TheScrawledMessage := {"The message has been carelessly trampled, making it too difficult to read.\n"; Lose;}
+    "Blundering around in the dark isn't a good idea!"
+} if location = Bar && IsDark(location)  
+
+do Action("CarryOut","Go",direction) as
+{
+    TheScrawledMessage := {"The message has been carelessly trampled, making it too difficult to read.\n"; Lose;}
+    "Blundering around in the dark isn't a good idea!"
+} if location = Bar && IsDark(location)  
+
+
+do Action("CarryOut","Take",cloak) as
+{
+	IsDark(Bar) := true;
+} if IsWearing(me,cloak) = false  
+
+do Action("CarryOut","PutOn",cloak,something) as
+{
+    IsDark(Bar) := false;
+} if location = cloakroom
+
+do Action("CarryOut","Drop",cloak) as
+{
+    IsDark(Bar) := false;
+} if location = cloakroom
+
+do CloakMsg as "This isn't the best place to leave a smart cloak lying around."
+
+do Action("CarryOut","PutOn",cloak,something) as
+{
+    CloakMsg;
+} if location != cloakroom  
+
+do Action("CarryOut","Drop",cloak) as
+{
+    CloakMsg;
+} if location != cloakroom 
+
+do WhenPlayBegins as {"Hurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game?";}
+
+
+do Instructions as 
+{
+	"Type up to a four-word sentence in the form of VERB NOUN PREPOSITION NOUN. Adjectives and articles are not allowed."; newline;
+} if verb = "" && noun = "" && prep = "" && noun2 = "" && TurnCount = 1
+
+rules named Instructions precede rules named BlankLine
+
+
+do Price(obj) as 0
+
+do Price(obj) as 10 if Treasure(obj)
+do Hit(MingVase) as {"It cracks."; Price(MingVase):=0;}
+do Treasure(obj) as false
+do Treasure(HopeDiamond) as true
+do Treasure(MingVase) as true
+
+
+do CanContain("bag")
+
+
+rules named Action("CarryOut"* in Volume 1 - cloak of darkness precede rules named Action("CarryOut"* in Volume - the Standard Rules
+
