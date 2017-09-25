@@ -4,6 +4,8 @@ Interactive fiction author Andrew "zarf" Plotkin [suggested](http://eblong.com/z
 
 Most of this language is straightforward (for being written in a weekend), but the only cool part is the ability to specify an ad-hoc group of rules, and state that they precede another group of rules.  The most interesting code in here is the code that checks this.  It sorts the groups into order, ensures a particular rule needn't precede itself, finds subset/superset/overlap/equality relations between groups like a Venn diagram, all with good error messages.
 
+Whether or not it solved zarf's problem is (for me) beside the point.  It's a cool feature because it makes the program's *temporal* information explicit.  There aren't many languages with explicit temporal constructs, since the imperative & functional programming paradigms always list statements in chronological order.
+
 
 ## Inform 7 to Zarfian
 
@@ -135,18 +137,10 @@ But Zarfian prefers a description-of-rules, to select a subset of rules.  Curren
         rules checking Verb precede rules checking TurnCount
         rules changing Score precede rules reading Score
 
-The clauses in a rule description are "named", "in", "checking", "changing", and "reading".  "Named" performs a wildcard match on the rulebook's name. (Individual rules do not have names). The * asterisk can be used anywhere in the pattern, and multiple times, such as *Putting* to catch CheckPuttingOn and ReportPuttingDown.  "In" refers to everything within a heading.  "Checking" refers to a variable mentioned in a rule's "if" clause. "Reading" refers to a variable mentioned in a rule's "as" clause. "Changing" refers to a variable that appears on the left-hand side of the := assignment operator within a rule's "as" clause.  
+The clauses in a rule description are "named", "in", "checking", "changing", and "reading".  "Named" performs a wildcard match on the rulebook's name. (Individual rules do not have names). The \* asterisk can be used anywhere in the pattern, and multiple times, such as \*Putting\* to catch CheckPuttingOn and ReportPuttingDown.  "In" refers to everything within a heading.  "Checking" refers to a variable mentioned in a rule's "if" clause. "Reading" refers to a variable mentioned in a rule's "as" clause. "Changing" refers to a variable that appears on the left-hand side of the := assignment operator within a rule's "as" clause.  
 
-In the current implementation, these clauses can be combined, though the same clause can't be used twice in the same description. I think this is good enough for a prototype though a real implementation would likely want to add that as well.  Additionally it might allow a "description-of-expressions" so we could identify rules which do "any math operation" on "any variable named attack*" and other arbitrary selections. But the current implementation gives the flavor of the feature with half the work.
+In the current implementation, these clauses can be combined, though the same clause can't be used twice in the same description. I think this is good enough for a prototype though a real implementation would likely want to add that as well.  Additionally it might allow a "description-of-expressions" so we could identify rules which do "any math operation" on "any variable named attack\*" and other arbitrary selections. But the current implementation gives the flavor of the feature with half the work.
 
-After the compiler gathers all the rules from all the source files, extensions, and the standard library, it then examines the precedence rules.  The current implementation first ensures no rule will appear on both side of a precedence rule.  For example, there's probably a rule somewhere that both reads and changes the score, so the above precedence rule is saying that particular rule would have to precede itself.  Secondly, the current implementation performs a simple check for cyclical reasoning, such as if the author had also stated "rules named Report* precede rules named Check*" in addition to the above two. 
+After the compiler gathers all the rules from all the source files, extensions, and the standard library, it then examines the precedence rules.  The current implementation first ensures no rule will appear on both side of a precedence rule.  For example, there's probably a rule somewhere that both reads and changes the score, so the above precedence rule is saying that particular rule would have to precede itself.  Secondly, the current implementation performs a simple check for cyclical reasoning, such as if the author had also stated "rules named Report\* precede rules named Check\*" in addition to the above two. 
 
-
-
-
-A function is a computed relation, not a static data relation.
-
-Data relations take concrete objects, not variables?
-
-Function relations take variables, not concrete objects?
-
+In this way groups of rules are sorted into a chronological partial order by way of compiler directive. 
