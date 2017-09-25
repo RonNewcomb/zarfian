@@ -1,3 +1,12 @@
+## The Teal;Deer
+
+Interactive fiction author Andrew "zarf" Plotkin [suggested](http://eblong.com/zarf/essays/rule-based-if/index.html) a rule-based language for IF creation, where a rule is a body of imperative code that self-invoke when its attached condition becomes true.  It can have a tag attached, called an atom, which is a non-unique name.  His unresolved issue was how to specify in what order rules should fire in relation to each other.
+
+Most of this language is straightforward (for being written in a weekend), but the only cool part is the ability to specify an ad-hoc group of rules, and state that they precede another group of rules.  The most interesting code in here is the code that checks this.  It sorts the groups into order, ensures a particular rule needn't precede itself, finds subset/superset/overlap/equality relations between groups like a Venn diagram, all with good error messages.
+
+
+## Inform 7 to Zarfian
+
 Zarf's rule-based language for creating I-F: "zarfian".
 
 It is relation-based, rule-based, and has a touch of aspect-oriented programming. 
